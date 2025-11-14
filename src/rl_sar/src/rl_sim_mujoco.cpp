@@ -11,7 +11,10 @@ RL_Sim::RL_Sim(int argc, char **argv)
 {
     // Set static instance pointer early for signal handler
     instance = this;
-
+    // std::cout << argc << std::endl;
+    // std::cout << argv[0] << std::endl;
+    // std::cout << argv[1] << std::endl;
+    // std::cout << argv[2] << std::endl;
     if (argc < 3)
     {
         std::cout << LOGGER::ERROR << "Usage: " << argv[0] << " robot_name scene_name" << std::endl;
@@ -79,7 +82,7 @@ RL_Sim::RL_Sim(int argc, char **argv)
 
     this->mj_model = m;
     this->mj_data = d;
-    this->SetupSysJoystick("/dev/input/js0", 16); // 16 bits joystick
+    // this->SetupSysJoystick("/dev/input/js0", 16); // 16 bits joystick
 
     // read params from yaml
     this->ReadYaml(this->robot_name, "base.yaml");
@@ -113,9 +116,9 @@ RL_Sim::RL_Sim(int argc, char **argv)
     this->loop_keyboard = std::make_shared<LoopFunc>("loop_keyboard", 0.05, std::bind(&RL_Sim::KeyboardInterface, this));
     this->loop_keyboard->start();
 
-    // joystick
-    this->loop_joystick = std::make_shared<LoopFunc>("loop_joystick", 0.01, std::bind(&RL_Sim::GetSysJoystick, this));
-    this->loop_joystick->start();
+    // // joystick
+    // this->loop_joystick = std::make_shared<LoopFunc>("loop_joystick", 0.01, std::bind(&RL_Sim::GetSysJoystick, this));
+    // this->loop_joystick->start();
 
 #ifdef PLOT
     this->plot_t = std::vector<int>(this->plot_size, 0);
@@ -142,7 +145,7 @@ RL_Sim::~RL_Sim()
     instance = nullptr;
 
     this->loop_keyboard->shutdown();
-    this->loop_joystick->shutdown();
+    // this->loop_joystick->shutdown();
     this->loop_control->shutdown();
     this->loop_rl->shutdown();
 #ifdef PLOT
@@ -329,8 +332,12 @@ void RL_Sim::GetSysJoystick()
 
 void RL_Sim::RunModel()
 {
+    // std::cout << "RunModel ...1" << std::endl;
+    // std::cout << "rl_init_done: " << this->rl_init_done << std::endl;
+    // std::cout << "simulation_running: " << simulation_running << std::endl;
     if (this->rl_init_done && simulation_running)
     {
+        std::cout << "RunModel ..." << std::endl;
         this->episode_length_buf += 1;
         this->obs.ang_vel = this->robot_state.imu.gyroscope;
         this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
@@ -387,6 +394,7 @@ std::vector<float> RL_Sim::Forward()
     std::vector<float> clamped_obs = this->ComputeObservation();
 
     std::vector<float> actions;
+    std::cout << "Forward ..." << std::endl;
     if (this->params.Get<std::vector<int>>("observations_history").size() != 0)
     {
         this->history_obs_buf.insert(clamped_obs);

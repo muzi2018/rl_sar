@@ -469,6 +469,7 @@ std::vector<T> ReadVectorFromYaml(const YAML::Node &node)
 void RL::ReadYaml(const std::string& file_path, const std::string& file_name)
 {
     std::string config_path = std::string(POLICY_DIR) + "/" + file_path + "/" + file_name;
+    std::cout << "config_path: " << config_path << std::endl;
     YAML::Node config;
     try
     {
@@ -589,6 +590,7 @@ bool RLFSMState::Interpolate(
 void RLFSMState::RLControl()
 {
     std::vector<float> _output_dof_pos, _output_dof_vel;
+    // std::cout << "RLControl" << std::endl;
     if (rl.output_dof_pos_queue.try_pop(_output_dof_pos) && rl.output_dof_vel_queue.try_pop(_output_dof_vel))
     {
         for (int i = 0; i < rl.params.Get<int>("num_of_dofs"); ++i)
